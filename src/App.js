@@ -1,20 +1,26 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import Select from 'react-select';
+import { Grid, Row, Col } from 'react-bootstrap'
 
 const ApiEndpoint = "https://free.currencyconverterapi.com/api/v6/";
 const ConvertEndpoint = ApiEndpoint + "convert?q=";
 const CompactEndpoint = "&compact=y";
 
-class Heading extends Component {
+const options = [
+  { value: 'USD', label: 'USD' },
+  { value: 'ZAR', label: 'ZAR'}
+]
+
+class CurrencyConversionResult extends Component {
   constructor(props) {
     super(props);
-    this.state = {name: 0};
+    this.state = {conversion: 0};
   }
 
   componentDidMount(){
-    let request = "USD_ZAR";
-    this.getConversionResult(request)
+    this.getConversionResult(this.props.request)
   }
 
   async getConversionResult(request) {
@@ -23,15 +29,59 @@ class Heading extends Component {
     let data = await response.json()
     let conversionResult = data[request];
     console.log(conversionResult);
-    this.setState({ name: conversionResult.val });
+    this.setState({ conversion: conversionResult.val });
   }
 
   render() {
-    let request = "USD_ZAR";
     return (
-      <label>
-        {request}: {this.state.name}
-      </label>
+      <div>
+        {this.props.request}: {this.state.conversion}
+      </div>
+    );
+  }
+}
+
+class CurrencySelector extends Component {
+  state = {
+    selectedOption: null
+  }
+  handleChange = (selectedOption) => {
+    this.setState({selectedOption});
+    console.log('Option selected: ', selectedOption);
+  }
+
+  render() {
+    const requestCurrencies = "USD_ZAR";
+    const {selectedOption} = this.state;
+
+    return (
+      <div>
+        <Grid>
+          <Row>
+            <Col md={6}>
+              Select from currency
+          </Col>
+            <Col md={6}>
+              Select to currency
+          </Col>
+          </Row>
+          <Row>
+            <Col md={6}>
+              <Select className={'select-box'}
+                value={selectedOption}
+                onChange={this.handleChange}
+                options={options} />
+            </Col>
+            <Col md={6}>
+              <Select className={'select-box'}
+                value={selectedOption}
+                onChange={this.handleChange}
+                options={options} />
+            </Col>
+          </Row>
+          <CurrencyConversionResult request={requestCurrencies} />
+        </Grid>
+      </div>
     );
   }
 }
@@ -47,7 +97,7 @@ class App extends Component {
         <p className="App-intro">
           To get started, edit <code>src/App.js</code> and save to reload.
         </p>
-        <Heading />
+        <CurrencySelector />
       </div>
     );
   }

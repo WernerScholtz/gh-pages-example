@@ -9,27 +9,29 @@ const CompactEndpoint = "&compact=y";
 class Heading extends Component {
   constructor(props) {
     super(props);
-    let request = "USD_ZAR";
-    this.state = this.getConversionResult(request);
+    this.state = {name: 0};
   }
-  getConversionResult(request) {
+
+  componentDidMount(){
+    let request = "USD_ZAR";
+    this.getConversionResult(request)
+  }
+
+  async getConversionResult(request) {
     const conversionRequest = ConvertEndpoint + request + CompactEndpoint;
-    return fetch(conversionRequest)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        let conversionResult = data[request];
-        return conversionResult;
-      })
+    let response = await fetch(conversionRequest)
+    let data = await response.json()
+    let conversionResult = data[request];
+    console.log(conversionResult);
+    this.setState({ name: conversionResult.val });
   }
 
   render() {
     let request = "USD_ZAR";
     return (
-      <div>
-        {request}: {this.state}
-      </div>
+      <label>
+        {request}: {this.state.name}
+      </label>
     );
   }
 }

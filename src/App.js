@@ -7,6 +7,7 @@ import { Grid, Row, Col } from 'react-bootstrap';
 const ApiEndpoint = "https://free.currencyconverterapi.com/api/v6/";
 const ConvertEndpoint = ApiEndpoint + "convert?compact=y&q=";
 const CurrenciesEndpoint = ApiEndpoint + 'currencies';
+var currencies = null;
 
 class CurrencyConversion extends Component {
   constructor(props) {
@@ -22,7 +23,9 @@ class CurrencyConversion extends Component {
       & this.props.toRequest !== this.props.fromRequest) {
       let request = this.props.fromRequest.value + '_' + this.props.toRequest.value;
       let conversionResult = await this.getConversionResult(request);
-      let updatedConversionDisplay = this.props.fromRequest.label + ' to ' + this.props.toRequest.label + ': ' + conversionResult;
+      let toCurrencySymbol = currencies[this.props.toRequest.value].currencySymbol;
+      let fromCurrencySymbol = currencies[this.props.fromRequest.value].currencySymbol;
+      let updatedConversionDisplay = fromCurrencySymbol + '1 is worth ' + toCurrencySymbol + conversionResult;
       this.setState({ conversionDisplay: updatedConversionDisplay });
     }
   }
@@ -63,6 +66,7 @@ class CurrencySelector extends Component {
     let response = await fetch(CurrenciesEndpoint);
     let data = await response.json();
     let currenciesResult = data['results'];
+    currencies = currenciesResult;
 
     let optionsArray = Object.keys(currenciesResult).map((key) => {
       let currencyEntry = { value: currenciesResult[key].id, label: currenciesResult[key].currencyName };
@@ -135,7 +139,7 @@ class App extends Component {
           <h1 className="App-title">Welcome to a simple currency conversion app built with React</h1>
         </header>
         <p className="App-intro">
-          Select currencies below to convert.
+          Please select currencies below to convert.
         </p>
         <CurrencySelector />
       </div>

@@ -16,15 +16,20 @@ const options = [
 class CurrencyConversion extends Component {
   constructor(props) {
     super(props);
-    this.state = {conversion: 0};
+    this.state = {conversion: 0,
+    conversionDisplay: 'Please select currencies to convert.'};
   }
 
-  componentDidMount() {
-    if (this.props.fromRequest !== null & this.props.toRequest !== null) {
-      if (this.props.fromRequest.length > 0 & this.props.toRequest.length > 0) {
-        let request = this.props.fromRequest + '_' + this.props.toRequest;
-        this.getConversionResult(request);
-      }
+  async componentDidUpdate(prevProps) {
+    if (this.props.fromRequest !== null
+      & this.props.toRequest !== null
+      & (this.props.fromRequest !== prevProps.fromRequest
+      | this.props.toRequest !== prevProps.toRequest)
+      & this.props.toRequest !== this.props.fromRequest) {
+      let request = this.props.fromRequest.value + '_' + this.props.toRequest.value;
+      let conversionResult = await this.getConversionResult(request);
+      let updatedConversionDisplay = this.props.fromRequest.label + ' to ' + this.props.toRequest.label + ': ' + conversionResult;
+      this.setState({ conversionDisplay: updatedConversionDisplay });
     }
   }
 
@@ -34,7 +39,7 @@ class CurrencyConversion extends Component {
     let data = await response.json()
     let conversionResult = data[request];
     console.log(conversionResult);
-    this.setState({ conversion: conversionResult.val });
+    return conversionResult.val;
   }
 
   render() {
@@ -42,7 +47,7 @@ class CurrencyConversion extends Component {
         <Grid>
           <Row>
             <Col md={12}>
-              {this.props.fromRequest} to {this.props.toRequest}: {this.state.conversion}
+              {this.state.conversionDisplay}
             </Col>
           </Row>
         </Grid>

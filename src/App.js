@@ -44,7 +44,7 @@ class CurrencyConversion extends Component {
 
   render() {
     return (
-        <Grid>
+        <Grid className={'currency-conversion'}>
           <Row>
             <Col md={12}>
               {this.state.conversionDisplay}

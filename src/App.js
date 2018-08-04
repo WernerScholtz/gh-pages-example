@@ -5,13 +5,8 @@ import Select from 'react-select';
 import { Grid, Row, Col } from 'react-bootstrap'
 
 const ApiEndpoint = "https://free.currencyconverterapi.com/api/v6/";
-const ConvertEndpoint = ApiEndpoint + "convert?q=";
-const CompactEndpoint = "&compact=y";
-
-const options = [
-  { value: 'USD', label: 'USD' },
-  { value: 'ZAR', label: 'ZAR'}
-]
+const ConvertEndpoint = ApiEndpoint + "convert?compact=y&q=";
+const CurrenciesEndpoint = ApiEndpoint + 'currencies'
 
 class CurrencyConversion extends Component {
   constructor(props) {
@@ -34,9 +29,9 @@ class CurrencyConversion extends Component {
   }
 
   async getConversionResult(request) {
-    const conversionRequest = ConvertEndpoint + request + CompactEndpoint;
-    let response = await fetch(conversionRequest)
-    let data = await response.json()
+    const conversionRequest = ConvertEndpoint + request;
+    let response = await fetch(conversionRequest);
+    let data = await response.json();
     let conversionResult = data[request];
     console.log(conversionResult);
     return conversionResult.val;
@@ -59,7 +54,27 @@ class CurrencySelector extends Component {
   state = {
     selectedFromOption: null,
     selectedToOption: null,
+    options: []
   }
+
+  componentDidMount() {
+    this.getCurrencies();
+  }
+
+  async getCurrencies() {
+    let response = await fetch(CurrenciesEndpoint);
+    let data = await response.json();
+    let currenciesResult = data['results'];
+    console.log(currenciesResult);
+
+    let optionsArray = Object.keys(currenciesResult).map((key) => {
+      let currencyEntry = { value: currenciesResult[key].id, label: currenciesResult[key].currencyName };
+      return currencyEntry;
+    });
+
+    this.setState({options: optionsArray}) ;
+  }
+
   handleFromChange = (selectedFromOption) => {
     this.setState({selectedFromOption});
     console.log('Option selected: ', selectedFromOption);
@@ -88,13 +103,13 @@ class CurrencySelector extends Component {
               <Select className={'select-box'}
                 value={selectedFromOption}
                 onChange={this.handleFromChange}
-                options={options} />
+                options={this.state.options} />
             </Col>
             <Col md={6}>
               <Select className={'select-box'}
                 value={selectedToOption}
                 onChange={this.handleToChange}
-                options={options} />
+                options={this.state.options} />
             </Col>
           </Row>
         </Grid>

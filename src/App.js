@@ -13,7 +13,7 @@ const options = [
   { value: 'ZAR', label: 'ZAR'}
 ]
 
-class CurrencyConversionResult extends Component {
+class CurrencyConversion extends Component {
   constructor(props) {
     super(props);
     this.state = {conversion: 0};
@@ -34,9 +34,13 @@ class CurrencyConversionResult extends Component {
 
   render() {
     return (
-      <div>
-        {this.props.request}: {this.state.conversion}
-      </div>
+        <Grid>
+          <Row>
+            <Col md={12}>
+              {this.props.request}: {this.state.conversion}
+            </Col>
+          </Row>
+        </Grid>
     );
   }
 }
@@ -84,8 +88,8 @@ class CurrencySelector extends Component {
                 options={options} />
             </Col>
           </Row>
-          <CurrencyConversionResult request={requestCurrencies} />
         </Grid>
+        <CurrencyConversion request={requestCurrencies} />
       </div>
     );
   }

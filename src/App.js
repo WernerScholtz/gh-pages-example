@@ -19,8 +19,13 @@ class CurrencyConversion extends Component {
     this.state = {conversion: 0};
   }
 
-  componentDidMount(){
-    this.getConversionResult(this.props.request)
+  componentDidMount() {
+    if (this.props.fromRequest !== null & this.props.toRequest !== null) {
+      if (this.props.fromRequest.length > 0 & this.props.toRequest.length > 0) {
+        let request = this.props.fromRequest + '_' + this.props.toRequest;
+        this.getConversionResult(request);
+      }
+    }
   }
 
   async getConversionResult(request) {
@@ -37,7 +42,7 @@ class CurrencyConversion extends Component {
         <Grid>
           <Row>
             <Col md={12}>
-              {this.props.request}: {this.state.conversion}
+              {this.props.fromRequest} to {this.props.toRequest}: {this.state.conversion}
             </Col>
           </Row>
         </Grid>
@@ -60,7 +65,6 @@ class CurrencySelector extends Component {
   }
 
   render() {
-    const requestCurrencies = "USD_ZAR";
     const {selectedFromOption, selectedToOption} = this.state;
 
     return (
@@ -89,7 +93,9 @@ class CurrencySelector extends Component {
             </Col>
           </Row>
         </Grid>
-        <CurrencyConversion request={requestCurrencies} />
+        <CurrencyConversion
+        fromRequest={this.state.selectedFromOption}
+        toRequest={this.state.selectedToOption} />
       </div>
     );
   }

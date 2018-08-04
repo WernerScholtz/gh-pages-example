@@ -43,16 +43,21 @@ class CurrencyConversionResult extends Component {
 
 class CurrencySelector extends Component {
   state = {
-    selectedOption: null
+    selectedFromOption: null,
+    selectedToOption: null,
   }
-  handleChange = (selectedOption) => {
-    this.setState({selectedOption});
-    console.log('Option selected: ', selectedOption);
+  handleFromChange = (selectedFromOption) => {
+    this.setState({selectedFromOption});
+    console.log('Option selected: ', selectedFromOption);
+  }
+  handleToChange = (selectedToOption) => {
+    this.setState({selectedToOption});
+    console.log('Option selected: ', selectedToOption);
   }
 
   render() {
     const requestCurrencies = "USD_ZAR";
-    const {selectedOption} = this.state;
+    const {selectedFromOption, selectedToOption} = this.state;
 
     return (
       <div>
@@ -68,14 +73,14 @@ class CurrencySelector extends Component {
           <Row>
             <Col md={6}>
               <Select className={'select-box'}
-                value={selectedOption}
-                onChange={this.handleChange}
+                value={selectedFromOption}
+                onChange={this.handleFromChange}
                 options={options} />
             </Col>
             <Col md={6}>
               <Select className={'select-box'}
-                value={selectedOption}
-                onChange={this.handleChange}
+                value={selectedToOption}
+                onChange={this.handleToChange}
                 options={options} />
             </Col>
           </Row>

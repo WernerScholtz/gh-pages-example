@@ -23,10 +23,26 @@ class CurrencyConversion extends Component {
       & this.props.toRequest !== this.props.fromRequest) {
       let request = this.props.fromRequest.value + '_' + this.props.toRequest.value;
       let conversionResult = await this.getConversionResult(request);
-      let toCurrencySymbol = currencies[this.props.toRequest.value].currencySymbol;
-      let fromCurrencySymbol = currencies[this.props.fromRequest.value].currencySymbol;
+      let toCurrencySymbol = this.getToCurrencySymbol();
+      let fromCurrencySymbol = this.getFromCurrencySymbol();
       let updatedConversionDisplay = fromCurrencySymbol + '1 is worth ' + toCurrencySymbol + conversionResult;
       this.setState({ conversionDisplay: updatedConversionDisplay });
+    }
+  }
+
+  getToCurrencySymbol() {
+    if (currencies[this.props.toRequest.value].currencySymbol) {
+      return currencies[this.props.toRequest.value].currencySymbol;
+    } else {
+      return currencies[this.props.toRequest.value].currencyName + ' ';
+    }
+  }
+
+  getFromCurrencySymbol() {
+    if (currencies[this.props.fromRequest.value].currencySymbol) {
+      return currencies[this.props.fromRequest.value].currencySymbol;
+    } else {
+      return currencies[this.props.fromRequest.value].currencyName + ' ';
     }
   }
 
@@ -71,6 +87,12 @@ class CurrencySelector extends Component {
     let optionsArray = Object.keys(currenciesResult).map((key) => {
       let currencyEntry = { value: currenciesResult[key].id, label: currenciesResult[key].currencyName };
       return currencyEntry;
+    });
+
+    optionsArray.sort((a, b) => {
+      if ( a.label < b.label ) return -1;
+      if ( a.label > b.label ) return 1;
+      return 0;
     });
 
     this.setState({options: optionsArray}) ;

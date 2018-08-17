@@ -23,26 +23,26 @@ class CurrencyConversion extends Component {
       & this.props.toRequest !== this.props.fromRequest) {
       let request = this.props.fromRequest.value + '_' + this.props.toRequest.value;
       let conversionResult = await this.getConversionResult(request);
-      let toCurrencySymbol = this.getToCurrencySymbol();
-      let fromCurrencySymbol = this.getFromCurrencySymbol();
-      let updatedConversionDisplay = fromCurrencySymbol + '1 is worth ' + toCurrencySymbol + conversionResult;
+      let fromCurrencyMessage = this.getFromMessage();
+      let toCurrencyMessage = this.getToMessage(conversionResult);
+      let updatedConversionDisplay = fromCurrencyMessage + ' is worth ' + toCurrencyMessage;
       this.setState({ conversionDisplay: updatedConversionDisplay });
     }
   }
 
-  getToCurrencySymbol() {
-    if (currencies[this.props.toRequest.value].currencySymbol) {
-      return currencies[this.props.toRequest.value].currencySymbol;
+  getFromMessage() {
+    if (currencies[this.props.fromRequest.value].currencySymbol) {
+      return currencies[this.props.fromRequest.value].currencySymbol + '1';
     } else {
-      return currencies[this.props.toRequest.value].currencyName + ' ';
+      return '1 ' + currencies[this.props.fromRequest.value].currencyName;
     }
   }
 
-  getFromCurrencySymbol() {
-    if (currencies[this.props.fromRequest.value].currencySymbol) {
-      return currencies[this.props.fromRequest.value].currencySymbol;
+  getToMessage(conversionResult) {
+    if (currencies[this.props.toRequest.value].currencySymbol) {
+      return currencies[this.props.toRequest.value].currencySymbol + conversionResult;
     } else {
-      return currencies[this.props.fromRequest.value].currencyName + ' ';
+      return conversionResult + ' ' + currencies[this.props.toRequest.value].currencyName;
     }
   }
 

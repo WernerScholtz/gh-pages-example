@@ -12,6 +12,7 @@
   height: auto;
   padding: 10px 20px;
   color: white;
+  margin-bottom: 10px;
 }
 
 .App-title {
@@ -20,12 +21,14 @@
 
 .App-intro {
   font-size: large;
-  margin-top: 10px;
 }
 
 .currency-conversion {
-  margin: 15px 0px;
   font-size: 1.5rem;
+}
+
+.select-element {
+  margin-bottom: 15px;
 }
 
 @keyframes App-logo-spin {

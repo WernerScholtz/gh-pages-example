@@ -9,24 +9,44 @@ const ConvertEndpoint = ApiEndpoint + "convert?compact=y&q=";
 const CurrenciesEndpoint = ApiEndpoint + 'currencies';
 var currencies = null;
 
+class ConversionCalculator extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { toResult: 0, fromResult: 0, conversionResult: props.conversionResult }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.conversionResult !== prevProps.conversionResult) {
+      this.setState({ conversionResult: this.props.conversionResult });
+    }
+  }
+
+  render() {
+    return (
+      <div>Hello {this.state.conversionResult}</div>
+    );
+  }
+
+}
+
 class CurrencyConversion extends Component {
   constructor(props) {
     super(props);
-    this.state = { conversionDisplay: 'Please select currencies to convert.' };
+    this.state = { conversionDisplay: 'Please select currencies to convert.', conversionResult: 0 };
   }
 
   async componentDidUpdate(prevProps) {
     if (this.props.fromRequest !== null
-      & this.props.toRequest !== null
-      & (this.props.fromRequest !== prevProps.fromRequest
-        | this.props.toRequest !== prevProps.toRequest)
-      & this.props.toRequest !== this.props.fromRequest) {
+        & this.props.toRequest !== null
+        & (this.props.fromRequest !== prevProps.fromRequest
+          | this.props.toRequest !== prevProps.toRequest)
+        & this.props.toRequest !== this.props.fromRequest) {
       let request = this.props.fromRequest.value + '_' + this.props.toRequest.value;
       let conversionResult = await this.getConversionResult(request);
       let fromCurrencyMessage = this.getFromMessage();
       let toCurrencyMessage = this.getToMessage(conversionResult);
       let updatedConversionDisplay = fromCurrencyMessage + ' is worth ' + toCurrencyMessage;
-      this.setState({ conversionDisplay: updatedConversionDisplay });
+      this.setState({ conversionDisplay: updatedConversionDisplay, conversionResult: conversionResult });
     }
   }
 
@@ -39,10 +59,11 @@ class CurrencyConversion extends Component {
   }
 
   getToMessage(conversionResult) {
+    var resultValue = conversionResult.toFixed(2);
     if (currencies[this.props.toRequest.value].currencySymbol) {
-      return currencies[this.props.toRequest.value].currencySymbol + conversionResult;
+      return currencies[this.props.toRequest.value].currencySymbol + resultValue;
     } else {
-      return conversionResult + ' ' + currencies[this.props.toRequest.value].currencyName;
+      return resultValue + ' ' + currencies[this.props.toRequest.value].currencyName;
     }
   }
 
@@ -51,11 +72,12 @@ class CurrencyConversion extends Component {
     let response = await fetch(conversionRequest);
     let data = await response.json();
     let conversionResult = data[request];
-    return conversionResult.val.toFixed(2);
+    return conversionResult.val;
   }
 
   render() {
     return (
+      <div>
       <Grid className={'currency-conversion'}>
         <Row>
           <Col md={12}>
@@ -63,6 +85,10 @@ class CurrencyConversion extends Component {
           </Col>
         </Row>
       </Grid>
+      <ConversionCalculator
+        conversionResult={this.state.conversionResult}
+      />
+      </div>
     );
   }
 }
@@ -198,7 +224,6 @@ async function SetCurrenciesWithLocalStorage() {
     let data = await response.json();
     let currenciesResult = data['results'];
     localStorage.setItem('Currencies', JSON.stringify(currenciesResult));
-    let currenciesFromStorage = localStorage.getItem('Currencies');
     currencies = JSON.parse(localStorage.getItem('Currencies'));
   }
 }

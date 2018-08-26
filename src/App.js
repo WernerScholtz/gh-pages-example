@@ -80,24 +80,9 @@ class CurrencySelector extends Component {
 
   async getCurrencies() {
     if (LocalStorageIsActive()) {
-      if (localStorage.getItem('Currencies')) {
-        currencies = JSON.parse(localStorage.getItem('Currencies'));
-      } else {
-        alert('Fetching Currencies for local storage.');
-        let response = await fetch(CurrenciesEndpoint);
-        let data = await response.json();
-        let currenciesResult = data['results'];
-        localStorage.setItem('Currencies', JSON.stringify(currenciesResult));
-        currencies = JSON.parse(localStorage.getItem('Currencies'));
-      }
+      await SetCurrenciesWithLocalStorage();
     } else {
-      if (currencies === null || !currencies) {
-        alert('Fetching Currencies without local storage.');
-        let response = await fetch(CurrenciesEndpoint);
-        let data = await response.json();
-        let currenciesResult = data['results'];
-        currencies = currenciesResult;
-      }
+      await SetCurrenciesWithoutLocalStorage();
     }
 
     let optionsArray = Object.keys(currencies).map((key) => {
@@ -180,9 +165,6 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to a simple currency conversion app built with React</h1>
         </header>
-        <p className="App-intro">
-          Please select currencies below to convert.
-        </p>
         <CurrencySelector />
       </div>
     );
@@ -204,6 +186,30 @@ function LocalStorageIsActive() {
     }
   } else {
     return false;
+  }
+}
+
+async function SetCurrenciesWithLocalStorage() {
+  if (localStorage.getItem('Currencies')) {
+    currencies = JSON.parse(localStorage.getItem('Currencies'));
+  } else {
+    alert('Fetching Currencies for local storage.');
+    let response = await fetch(CurrenciesEndpoint);
+    let data = await response.json();
+    let currenciesResult = data['results'];
+    localStorage.setItem('Currencies', JSON.stringify(currenciesResult));
+    let currenciesFromStorage = localStorage.getItem('Currencies');
+    currencies = JSON.parse(localStorage.getItem('Currencies'));
+  }
+}
+
+async function SetCurrenciesWithoutLocalStorage() {
+  if (currencies === null || !currencies) {
+    alert('Fetching Currencies without local storage.');
+    let response = await fetch(CurrenciesEndpoint);
+    let data = await response.json();
+    let currenciesResult = data['results'];
+    currencies = currenciesResult;
   }
 }
 

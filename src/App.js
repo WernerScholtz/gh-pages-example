@@ -12,18 +12,58 @@ var currencies = null;
 class ConversionCalculator extends Component {
   constructor(props) {
     super(props);
-    this.state = { toResult: 0, fromResult: 0, conversionResult: props.conversionResult }
+    this.state = { toValue: 0, fromValue: 0, conversionResult: 1 }
   }
 
   componentDidUpdate(prevProps) {
     if (this.props.conversionResult !== prevProps.conversionResult) {
-      this.setState({ conversionResult: this.props.conversionResult });
+      let fromResult = 1;
+      let toResult = fromResult * this.props.conversionResult;
+      this.setState({ fromValue: fromResult.toFixed(2), toValue: toResult.toFixed(2), conversionResult: this.props.conversionResult });
     }
+  }
+
+  handleFromChange = (event) => {
+    let value = parseFloat(event.target.value);
+    let toResult = value * this.state.conversionResult;
+    this.setState({ fromValue: value.toFixed(2), toValue: toResult.toFixed(2) });
+  }
+
+  handleToChange = (event) => {
+    let value = parseFloat(event.target.value);
+    let fromResult = 0;
+    if (this.state.conversionResult !== 0) {
+      fromResult = value / this.state.conversionResult;
+    }
+    this.setState({ toValue: value.toFixed(2), fromValue: fromResult.toFixed(2) });
   }
 
   render() {
     return (
-      <div>Hello {this.state.conversionResult}</div>
+      <Grid>
+        <Row>
+          <Col md={6}>
+            <Row>
+              <Col md={12}>
+                  From:
+              </Col>
+              <Col md={12}>
+                <input className={'value-input'} type="number" value={this.state.fromValue} onChange={this.handleFromChange} />
+              </Col>
+            </Row>
+          </Col>
+          <Col md={6}>
+            <Row>
+              <Col md={12}>
+                  To:
+              </Col>
+              <Col md={12}>
+                <input className={'value-input'} type="number" value={this.state.toValue} onChange={this.handleToChange} />
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+      </Grid>
     );
   }
 
@@ -45,7 +85,7 @@ class CurrencyConversion extends Component {
       let conversionResult = await this.getConversionResult(request);
       let fromCurrencyMessage = this.getFromMessage();
       let toCurrencyMessage = this.getToMessage(conversionResult);
-      let updatedConversionDisplay = fromCurrencyMessage + ' is worth ' + toCurrencyMessage;
+      let updatedConversionDisplay = fromCurrencyMessage + ' equals ' + toCurrencyMessage;
       this.setState({ conversionDisplay: updatedConversionDisplay, conversionResult: conversionResult });
     }
   }
@@ -142,9 +182,7 @@ class CurrencySelector extends Component {
             <Col md={6} className={'select-element'}>
               <Row>
                 <Col md={12}>
-                  <p>
                     Select from currency
-                  </p>
                 </Col>
               </Row>
               <Row>
@@ -159,9 +197,7 @@ class CurrencySelector extends Component {
             <Col md={6} className={'select-element'}>
               <Row>
                 <Col md={12}>
-                  <p>
                     Select to currency
-                  </p>
                 </Col>
               </Row>
               <Row>

@@ -12,7 +12,10 @@ var currencies = null;
 class ConversionCalculator extends Component {
   constructor(props) {
     super(props);
-    this.state = { toValue: 0, fromValue: 0, conversionResult: 1 }
+    this.state = { toValue: '0', fromValue: '0', conversionResult: '1' }
+
+    this.handleFromChange = this.handleFromChange.bind(this);
+    this.handleToChange = this.handleToChange.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -26,7 +29,7 @@ class ConversionCalculator extends Component {
   handleFromChange = (event) => {
     let value = parseFloat(event.target.value);
     let toResult = value * this.state.conversionResult;
-    this.setState({ fromValue: value.toFixed(2), toValue: toResult.toFixed(2) });
+    this.setState({ toValue: toResult.toFixed(2) });
   }
 
   handleToChange = (event) => {
@@ -35,35 +38,37 @@ class ConversionCalculator extends Component {
     if (this.state.conversionResult !== 0) {
       fromResult = value / this.state.conversionResult;
     }
-    this.setState({ toValue: value.toFixed(2), fromValue: fromResult.toFixed(2) });
+    this.setState({ fromValue: fromResult.toFixed(2) });
   }
 
   render() {
     return (
-      <Grid>
-        <Row>
-          <Col md={6}>
-            <Row>
-              <Col md={12}>
+      <form>
+        <Grid>
+          <Row>
+            <Col md={6}>
+              <Row>
+                <Col md={12}>
                   From:
               </Col>
-              <Col md={12}>
-                <input className={'value-input'} type="number" value={this.state.fromValue} onChange={this.handleFromChange} />
-              </Col>
-            </Row>
-          </Col>
-          <Col md={6}>
-            <Row>
-              <Col md={12}>
+                <Col md={12}>
+                  <input className={'value-input'} type="text" value={this.state.fromValue} onChange={this.handleFromChange} />
+                </Col>
+              </Row>
+            </Col>
+            <Col md={6}>
+              <Row>
+                <Col md={12}>
                   To:
               </Col>
-              <Col md={12}>
-                <input className={'value-input'} type="number" value={this.state.toValue} onChange={this.handleToChange} />
-              </Col>
-            </Row>
-          </Col>
-        </Row>
-      </Grid>
+                <Col md={12}>
+                  <input className={'value-input'} type="text" value={this.state.toValue} onChange={this.handleToChange} />
+                </Col>
+              </Row>
+            </Col>
+          </Row>
+        </Grid>
+      </form>
     );
   }
 

@@ -264,10 +264,8 @@ async function GetConversionResultWithLocalStorage(request) {
   let requestFlip = request.substring(4, 7) + '_' + request.substring(0, 3);
 
   if (localStorage.getItem(request)) {
-    console.log('Getting ' + request);
     return await GetConversionResultFromStorage(request);
   } else if (localStorage.getItem(requestFlip)) {
-    console.log('Getting ' + request);
     let result = await GetConversionResultFromStorage(requestFlip);
     if (result > 0) {
       return 1/result;
@@ -290,7 +288,6 @@ async function GetConversionResultFromStorage(request) {
 }
 
 async function FetchAndStoreConversionResult(request) {
-  console.log('Fetching from network and saving ' + request + ' to local storage.');
   let conversionResult = await GetConversionResult(request);
   let date = new Date();
   let time = date.getTime();

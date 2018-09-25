@@ -43,9 +43,9 @@ class ConversionCalculator extends Component {
       }
 
       this.setState({ fromValue: fromResult.toFixed(2), toValue: toResult.toFixed(2),
-                        conversionResult: this.props.conversionResult,
-                        fromCurrencySymbol: fromCurrencySymbol, fromCurrencyName: fromCurrencyName,
-                        toCurrencySymbol: toCurrencySymbol, toCurrencyName: toCurrencyName });
+                      conversionResult: this.props.conversionResult,
+                      fromCurrencySymbol: fromCurrencySymbol, fromCurrencyName: fromCurrencyName,
+                      toCurrencySymbol: toCurrencySymbol, toCurrencyName: toCurrencyName });
     }
   }
 
@@ -96,7 +96,6 @@ class CurrencyConversion extends Component {
       this.setState({ conversionResult: conversionResult, fromRequest: this.props.fromRequest.value, toRequest: this.props.toRequest.value });
     }
   }
-
 
   async getConversionResult(request) {
     if (LocalStorageIsActive) {
@@ -258,28 +257,34 @@ async function SetCurrenciesWithoutLocalStorage() {
 
 async function GetConversionResultWithLocalStorage(request) {
   let requestFlip = request.substring(4, 7) + '_' + request.substring(0, 3);
-  if (localStorage.getItem(request) !== null) {
-    let resultObject = JSON.parse(localStorage.getItem(request));
-    let date = new Date();
-    if ( date.getTime() - resultObject.time > 6000) {  // 3600000ms in an hour
-      return await GetAndStoreConversionResult(request);
+
+  if (localStorage.getItem(request)) {
+    console.log('Getting ' + request);
+    return await GetConversionResultFromStorage(request);
+  } else if (localStorage.getItem(requestFlip)) {
+    console.log('Getting ' + request);
+    let result = await GetConversionResultFromStorage(requestFlip);
+    if (result > 0) {
+      return 1/result;
+    } else {
+      return 0;
     }
-    console.log('Got ' + request + ' from local storage.');
-    return resultObject.conversionResult;
-  } else if (localStorage.getItem(requestFlip) !== null) {
-    let resultObject = JSON.parse(localStorage.getItem(requestFlip));
-    let date = new Date();
-    if ( date.getTime() - resultObject.time > 6000) { // 3600000ms in an hour
-      return await 1/GetAndStoreConversionResult(requestFlip);
-    }
-    console.log('Got ' + request + ' from local storage.');
-    return 1/resultObject.conversionResult;
   } else {
-    return await GetAndStoreConversionResult(request);
+    return await FetchAndStoreConversionResult(request);
   }
 }
 
-async function GetAndStoreConversionResult(request) {
+async function GetConversionResultFromStorage(request) {
+  let resultObject = JSON.parse(localStorage.getItem(request));
+  let date = new Date();
+  if ( date.getTime() - resultObject.time > 3600000 ) {
+    localStorage.removeItem(request);
+    return await FetchAndStoreConversionResult(request);
+  }
+  return resultObject.conversionResult;
+}
+
+async function FetchAndStoreConversionResult(request) {
   console.log('Fetching from network and saving ' + request + ' to local storage.');
   let conversionResult = await GetConversionResult(request);
   let date = new Date();

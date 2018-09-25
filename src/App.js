@@ -17,6 +17,7 @@ class ConversionCalculator extends Component {
                     toCurrencySymbol: '', toCurrencyName: '' }
 
     this.handleFromChange = this.handleFromChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -60,9 +61,13 @@ class ConversionCalculator extends Component {
     }
   }
 
+  handleSubmit(event) {
+    event.preventDefault();
+  }
+
   render() {
     return (
-      <form>
+      <form onSubmit={this.handleSubmit}>
         <Grid>
           <Row>
             <Col md={12}>

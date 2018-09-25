@@ -97,20 +97,13 @@ class CurrencyConversion extends Component {
     }
   }
 
-  getFromMessage() {
-    if (currencies[this.props.fromRequest.value].currencySymbol) {
-      return currencies[this.props.fromRequest.value].currencySymbol + '1';
-    } else {
-      return '1 ' + currencies[this.props.fromRequest.value].currencyName;
-    }
-  }
 
   async getConversionResult(request) {
-    const conversionRequest = ConvertEndpoint + request;
-    let response = await fetch(conversionRequest);
-    let data = await response.json();
-    let conversionResult = data[request];
-    return conversionResult.val;
+    if (LocalStorageIsActive) {
+      return await GetConversionResultWithLocalStorage(request);
+    } else {
+      return await GetConversionResult(request);
+    }
   }
 
   render() {
@@ -246,7 +239,6 @@ async function SetCurrenciesWithLocalStorage() {
   if (localStorage.getItem('Currencies')) {
     currencies = JSON.parse(localStorage.getItem('Currencies'));
   } else {
-    alert('Fetching Currencies for local storage.');
     let response = await fetch(CurrenciesEndpoint);
     let data = await response.json();
     let currenciesResult = data['results'];
@@ -257,12 +249,52 @@ async function SetCurrenciesWithLocalStorage() {
 
 async function SetCurrenciesWithoutLocalStorage() {
   if (currencies === null || !currencies) {
-    alert('Fetching Currencies without local storage.');
     let response = await fetch(CurrenciesEndpoint);
     let data = await response.json();
     let currenciesResult = data['results'];
     currencies = currenciesResult;
   }
+}
+
+async function GetConversionResultWithLocalStorage(request) {
+  let requestFlip = request.substring(4, 7) + '_' + request.substring(0, 3);
+  if (localStorage.getItem(request) !== null) {
+    let resultObject = JSON.parse(localStorage.getItem(request));
+    let date = new Date();
+    if ( date.getTime() - resultObject.time > 6000) {  // 3600000ms in an hour
+      return await GetAndStoreConversionResult(request);
+    }
+    console.log('Got ' + request + ' from local storage.');
+    return resultObject.conversionResult;
+  } else if (localStorage.getItem(requestFlip) !== null) {
+    let resultObject = JSON.parse(localStorage.getItem(requestFlip));
+    let date = new Date();
+    if ( date.getTime() - resultObject.time > 6000) { // 3600000ms in an hour
+      return await 1/GetAndStoreConversionResult(requestFlip);
+    }
+    console.log('Got ' + request + ' from local storage.');
+    return 1/resultObject.conversionResult;
+  } else {
+    return await GetAndStoreConversionResult(request);
+  }
+}
+
+async function GetAndStoreConversionResult(request) {
+  console.log('Fetching from network and saving ' + request + ' to local storage.');
+  let conversionResult = await GetConversionResult(request);
+  let date = new Date();
+  let time = date.getTime();
+  let conversionResultObject = { conversionResult, time };
+  localStorage.setItem(request, JSON.stringify(conversionResultObject));
+  return conversionResult;
+}
+
+async function GetConversionResult(request) {
+  const conversionRequest = ConvertEndpoint + request;
+  let response = await fetch(conversionRequest);
+  let data = await response.json();
+  let conversionResult = data[request];
+  return conversionResult.val;
 }
 
 export default App;

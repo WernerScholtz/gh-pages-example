@@ -12,33 +12,52 @@ var currencies = null;
 class ConversionCalculator extends Component {
   constructor(props) {
     super(props);
-    this.state = { toValue: '0', fromValue: '0', conversionResult: '1' }
+    this.state = { toValue: '1', fromValue: '1', conversionResult: '1',
+                    fromCurrencySymbol: '', fromCurrencyName: '',
+                    toCurrencySymbol: '', toCurrencyName: '' }
 
     this.handleFromChange = this.handleFromChange.bind(this);
-    this.handleToChange = this.handleToChange.bind(this);
   }
 
   componentDidUpdate(prevProps) {
     if (this.props.conversionResult !== prevProps.conversionResult) {
       let fromResult = 1;
       let toResult = fromResult * this.props.conversionResult;
-      this.setState({ fromValue: fromResult.toFixed(2), toValue: toResult.toFixed(2), conversionResult: this.props.conversionResult });
+
+      let fromCurrencySymbol = '';
+      let fromCurrencyName = '';
+      let toCurrencySymbol = '';
+      let toCurrencyName = '';
+      if (this.props.fromRequest && this.props.toRequest) {
+        if (currencies[this.props.fromRequest].currencySymbol) {
+          fromCurrencySymbol = currencies[this.props.fromRequest].currencySymbol;
+        } else {
+          fromCurrencyName = currencies[this.props.fromRequest].currencyName;
+        }
+
+        if (currencies[this.props.toRequest].currencySymbol) {
+          toCurrencySymbol = currencies[this.props.toRequest].currencySymbol;
+        } else {
+          toCurrencyName = currencies[this.props.toRequest].currencyName;
+        }
+      }
+
+      this.setState({ fromValue: fromResult.toFixed(2), toValue: toResult.toFixed(2),
+                        conversionResult: this.props.conversionResult,
+                        fromCurrencySymbol: fromCurrencySymbol, fromCurrencyName: fromCurrencyName,
+                        toCurrencySymbol: toCurrencySymbol, toCurrencyName: toCurrencyName });
     }
   }
 
   handleFromChange = (event) => {
     let value = parseFloat(event.target.value);
-    let toResult = value * this.state.conversionResult;
-    this.setState({ toValue: toResult.toFixed(2) });
-  }
-
-  handleToChange = (event) => {
-    let value = parseFloat(event.target.value);
-    let fromResult = 0;
-    if (this.state.conversionResult !== 0) {
-      fromResult = value / this.state.conversionResult;
+    if (value != null && value >= 0) {
+      let toResult = value * this.state.conversionResult;
+      this.setState({ toValue: toResult.toFixed(2) });
+    } else {
+      let toResult = 0;
+      this.setState({ toValue: toResult.toFixed(2) });
     }
-    this.setState({ fromValue: fromResult.toFixed(2) });
   }
 
   render() {
@@ -46,23 +65,10 @@ class ConversionCalculator extends Component {
       <form>
         <Grid>
           <Row>
-            <Col md={6}>
+            <Col md={12}>
               <Row>
                 <Col md={12}>
-                  From:
-              </Col>
-                <Col md={12}>
-                  <input className={'value-input'} type="text" value={this.state.fromValue} onChange={this.handleFromChange} />
-                </Col>
-              </Row>
-            </Col>
-            <Col md={6}>
-              <Row>
-                <Col md={12}>
-                  To:
-              </Col>
-                <Col md={12}>
-                  <input className={'value-input'} type="text" value={this.state.toValue} onChange={this.handleToChange} />
+                  {this.state.fromCurrencySymbol} <input className={'value-input'} type="text" defaultValue={this.state.fromValue} onChange={this.handleFromChange} /> {this.state.fromCurrencyName} equals {this.state.toCurrencySymbol} {this.state.toValue} {this.state.toCurrencyName}
                 </Col>
               </Row>
             </Col>
@@ -71,13 +77,12 @@ class ConversionCalculator extends Component {
       </form>
     );
   }
-
 }
 
 class CurrencyConversion extends Component {
   constructor(props) {
     super(props);
-    this.state = { conversionDisplay: 'Please select currencies to convert.', conversionResult: 0 };
+    this.state = { conversionResult: 0, fromRequest: '', toRequest: '' };
   }
 
   async componentDidUpdate(prevProps) {
@@ -88,10 +93,7 @@ class CurrencyConversion extends Component {
         & this.props.toRequest !== this.props.fromRequest) {
       let request = this.props.fromRequest.value + '_' + this.props.toRequest.value;
       let conversionResult = await this.getConversionResult(request);
-      let fromCurrencyMessage = this.getFromMessage();
-      let toCurrencyMessage = this.getToMessage(conversionResult);
-      let updatedConversionDisplay = fromCurrencyMessage + ' equals ' + toCurrencyMessage;
-      this.setState({ conversionDisplay: updatedConversionDisplay, conversionResult: conversionResult });
+      this.setState({ conversionResult: conversionResult, fromRequest: this.props.fromRequest.value, toRequest: this.props.toRequest.value });
     }
   }
 
@@ -100,15 +102,6 @@ class CurrencyConversion extends Component {
       return currencies[this.props.fromRequest.value].currencySymbol + '1';
     } else {
       return '1 ' + currencies[this.props.fromRequest.value].currencyName;
-    }
-  }
-
-  getToMessage(conversionResult) {
-    var resultValue = conversionResult.toFixed(2);
-    if (currencies[this.props.toRequest.value].currencySymbol) {
-      return currencies[this.props.toRequest.value].currencySymbol + resultValue;
-    } else {
-      return resultValue + ' ' + currencies[this.props.toRequest.value].currencyName;
     }
   }
 
@@ -122,18 +115,11 @@ class CurrencyConversion extends Component {
 
   render() {
     return (
-      <div>
-      <Grid className={'currency-conversion'}>
-        <Row>
-          <Col md={12}>
-            {this.state.conversionDisplay}
-          </Col>
-        </Row>
-      </Grid>
-      <ConversionCalculator
-        conversionResult={this.state.conversionResult}
-      />
-      </div>
+        <ConversionCalculator
+          conversionResult={this.state.conversionResult}
+          fromRequest={this.state.fromRequest}
+          toRequest={this.state.toRequest}
+        />
     );
   }
 }
